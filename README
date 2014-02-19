@@ -1,0 +1,25 @@
+Mediapadtech - Guest eXPerience
+
+This application is an open source Hotel in room guest experience enhancer.
+It enables hotel managers to provide guest services directly on theirs phone and tablets.
+From a guest point of view, it will enable a whole new stay experience.
+
+Fist based on Java, we decided to make it open source and migrate it to scala.
+The application will be gradually open sourced while moving to scala.
+
+We will also provide an "on demand" service so you can quickly evaluate the possibilities.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+If you need a commercial licence, please contact us at <licence mail address>.
