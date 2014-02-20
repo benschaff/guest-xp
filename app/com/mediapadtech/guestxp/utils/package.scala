@@ -1,4 +1,6 @@
-package com.mediapadtech.controllers
+package com.mediapadtech.guestxp
+
+import play.api.libs.MimeTypes
 
 /**
  * This file is part of guest-xp.
@@ -18,13 +20,11 @@ package com.mediapadtech.controllers
  *
  * "Copyright 2014 Benjamin Schaff"
  */
+package object utils {
 
-import play.api.mvc._
-
-object Application extends Controller {
-
-  def index = Action {
-    Ok
+  def extensionForMimeType(mimeType: String): Option[String] = MimeTypes.types.find(_._2 == mimeType) match {
+    case Some(keyValue) => Some(keyValue._2)
+    case None => None
   }
 
 }
