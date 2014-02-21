@@ -21,14 +21,14 @@ import com.mediapadtech.guestxp.models.restaurant.Menu.{Name, Category}
  *
  * "Copyright 2014 Benjamin Schaff"
  */
-case class Menu(name: Name, items: Map[Category, MenuItem])
+case class Menu(name: Name, items: Map[Category, MenuItem] = Map.empty[Category, MenuItem])
 
 case class MenuItem(name: String,
                     description: String,
-                    thumbnail: Option[Media] = None /*,
+                    thumbnail: Option[Media] = None,
                     medias: Set[Media] = Set.empty[Media],
                     comments: List[Comment] = List.empty[Comment],
-                    rating: Option[Double]*/)
+                    rating: Option[Double])
 
 object Menu {
 

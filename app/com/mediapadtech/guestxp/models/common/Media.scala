@@ -1,7 +1,6 @@
 package com.mediapadtech.guestxp.models.common
 
 import reactivemongo.bson.BSONObjectID
-import scala.util.{Failure, Success}
 
 /**
  * This file is part of guest-xp.
@@ -22,26 +21,3 @@ import scala.util.{Failure, Success}
  * "Copyright 2014 Benjamin Schaff"
  */
 case class Media(id: Option[BSONObjectID], title: String, description: String, mimeType: String, extension: Option[String])
-
-case class MediaView(id: Option[String], title: String, description: String, mimeType: String, extension: Option[String])
-
-object MediaImplicitConversions {
-
-  implicit def mediaView2Media(mediaView: MediaView): Media = Media(
-    mediaView.id.flatMap {
-      stringId => BSONObjectID.parse(stringId) match {
-        case Success(objectId) => Some(objectId)
-        case Failure(_) => None
-      }
-    },
-    mediaView.title,
-    mediaView.description,
-    mediaView.mimeType,
-    mediaView.extension
-  )
-
-  implicit def media2MediaView(media: Media): MediaView = MediaView(
-    media.id.map(_.stringify), media.title, media.description, media.mimeType, media.extension
-  )
-
-}
