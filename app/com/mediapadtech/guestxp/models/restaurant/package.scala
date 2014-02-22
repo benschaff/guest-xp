@@ -1,14 +1,6 @@
 package com.mediapadtech.guestxp.models
 
-import reactivemongo.bson.{BSONDocumentWriter, BSONDocument, BSONDocumentReader}
-import com.mediapadtech.guestxp.models.common._
-import com.mediapadtech.guestxp.models.restaurant.Menu.Category
-import com.mediapadtech.guestxp.models.common.Coordinates
-import com.mediapadtech.guestxp.models.common.Media
-import com.mediapadtech.guestxp.models.common.Comment
-import com.mediapadtech.guestxp.models.common.Address
-import com.mediapadtech.guestxp.models.restaurant.Restaurant.Day
-
+import play.api.libs.json.Json.JsValueWrapper
 
 /**
  * This file is part of guest-xp.
@@ -30,97 +22,58 @@ import com.mediapadtech.guestxp.models.restaurant.Restaurant.Day
  */
 package object restaurant {
 
+  type Day = Int
+
+  type Category = String
+
+  type Name = String
+
   object JsFormat {
 
+    import play.api.libs.json._
     import com.mediapadtech.guestxp.models.common.JsFormats._
 
-    implicit object MenuItemBSONReader extends BSONDocumentReader[MenuItem] {
+    implicit val menuItemFormat = Json.format[MenuItem]
+    implicit val menuFormat = Json.format[Menu]
+    implicit val scheduleEntryFormat = Json.format[ScheduleEntry]
 
-      def read(document: BSONDocument): MenuItem = MenuItem(
-        document.getAs[String]("name").get,
-        document.getAs[String]("description").get,
-        document.getAs[Media]("thumbnail"),
-        document.getAs[Set[Media]]("medias").getOrElse(Set.empty[Media]),
-        document.getAs[List[Comment]]("comments").getOrElse(List.empty[Comment]),
-        document.getAs[Double]("rating")
-      )
+    implicit val scheduleFormat = new Format[Map[Day, ScheduleEntry]] {
 
-    }
+      def writes(schedule: Map[Day, ScheduleEntry]): JsValue = {
+        Json.obj(
+          schedule.map {
+            case (day, scheduleEntry) => day.toString -> Json.toJson(scheduleEntry).asInstanceOf[JsValueWrapper]
+          }.toSeq: _*
+        )
+      }
 
-    implicit object MenuItemBSONWriter extends BSONDocumentWriter[MenuItem] {
-
-      def write(menuItem: MenuItem): BSONDocument = BSONDocument(
-        "name" -> menuItem.name,
-        "description" -> menuItem.description,
-        "thumbnail" -> menuItem.thumbnail,
-        "medias" -> menuItem.medias,
-        "comments" -> menuItem.comments,
-        "rating" -> menuItem.rating
-      )
+      def reads(jsValue: JsValue): JsResult[Map[Day, ScheduleEntry]] = {
+        JsSuccess(jsValue.as[Map[String, JsValue]].map {
+          case (k, v) => k.toInt -> v.as[ScheduleEntry]
+        })
+      }
 
     }
 
-    implicit object MenuBSONReader extends BSONDocumentReader[Menu] {
+    implicit val menusFormat = new Format[Map[Name, Menu]] {
 
-      def read(document: BSONDocument): Menu = Menu(
-        document.getAs[String]("name").get,
-        document.getAs[Map[Category, MenuItem]]("items").getOrElse(Map.empty[Category, MenuItem])
-      )
+      def writes(schedule: Map[Name, Menu]): JsValue = {
+        Json.obj(
+          schedule.map {
+            case (name, menu) => name -> Json.toJson(menu).asInstanceOf[JsValueWrapper]
+          }.toSeq: _*
+        )
+      }
 
-    }
-
-    implicit object MenuBSONWriter extends BSONDocumentWriter[Menu] {
-
-      def write(menu: Menu): BSONDocument = BSONDocument(
-        "name" -> menu.name,
-        "items" -> menu.items
-      )
-
-    }
-
-    implicit object ScheduleEntryBSONReader extends BSONDocumentReader[ScheduleEntry] {
-
-      def read(document: BSONDocument): ScheduleEntry = ScheduleEntry(
-        document.getAs[Int]("openingHour").get,
-        document.getAs[Int]("closingHour").get
-      )
+      def reads(jsValue: JsValue): JsResult[Map[Name, Menu]] = {
+        JsSuccess(jsValue.as[Map[String, JsValue]].map {
+          case (k, v) => k -> v.as[Menu]
+        })
+      }
 
     }
 
-    implicit object ScheduleEntryBSONWriter extends BSONDocumentWriter[ScheduleEntry] {
-
-      def write(scheduleEntry: ScheduleEntry): BSONDocument = BSONDocument(
-        "openingHour" -> scheduleEntry.openingHour,
-        "closingHour" -> scheduleEntry.closingHour
-      )
-
-    }
-
-    implicit object RestaurantBSONReader extends BSONDocumentReader[Restaurant] {
-
-      def read(document: BSONDocument): Restaurant = Restaurant(
-        document.getAs[String]("name").get,
-        document.getAs[Address]("address").get,
-        document.getAs[Coordinates]("coordinates"),
-        document.getAs[Contact]("contact"),
-        document.getAs[Map[Day, ScheduleEntry]]("schedule").getOrElse(Map.empty[Day, ScheduleEntry]),
-        document.getAs[Map[Menu.Name, Menu]]("menus").getOrElse(Map.empty[Menu.Name, Menu])
-      )
-
-    }
-
-    implicit object RestaurantBSONWriter extends BSONDocumentWriter[Restaurant] {
-
-      def write(restaurant: Restaurant): BSONDocument = BSONDocument(
-        "name" -> restaurant.name,
-        "address" -> restaurant.address,
-        "coordinates" -> restaurant.coordinates,
-        "contact" -> restaurant.contact,
-        "schedule" -> restaurant.schedule,
-        "menus" -> restaurant.menus
-      )
-
-    }
+    implicit val restaurantFormat = Json.format[Restaurant]
 
   }
 

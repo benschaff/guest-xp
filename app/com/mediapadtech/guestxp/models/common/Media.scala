@@ -1,6 +1,5 @@
 package com.mediapadtech.guestxp.models.common
 
-import reactivemongo.bson.BSONObjectID
 
 /**
  * This file is part of guest-xp.
@@ -20,4 +19,4 @@ import reactivemongo.bson.BSONObjectID
  *
  * "Copyright 2014 Benjamin Schaff"
  */
-case class Media(id: Option[BSONObjectID], title: String, description: String, mimeType: String, extension: Option[String])
+case class Media(key: Option[String], title: String, description: String, mimeType: String, extension: Option[String])

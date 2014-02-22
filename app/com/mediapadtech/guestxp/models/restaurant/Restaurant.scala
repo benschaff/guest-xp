@@ -1,7 +1,6 @@
 package com.mediapadtech.guestxp.models.restaurant
 
 import com.mediapadtech.guestxp.models.common.{Contact, Coordinates, Address}
-import com.mediapadtech.guestxp.models.restaurant.Restaurant.Day
 
 /**
  * This file is part of guest-xp.
@@ -26,12 +25,6 @@ case class Restaurant(name: String,
                       coordinates: Option[Coordinates] = None,
                       contact: Option[Contact] = None,
                       schedule: Map[Day, ScheduleEntry] = Map.empty[Day, ScheduleEntry],
-                      menus: Map[Menu.Name, Menu] = Map.empty[Menu.Name, Menu])
+                      menus: Map[Name, Menu] = Map.empty[Name, Menu])
 
 case class ScheduleEntry(openingHour: Int, closingHour: Int)
-
-object Restaurant {
-
-  type Day = Int
-
-}

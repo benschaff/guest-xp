@@ -1,7 +1,6 @@
 package com.mediapadtech.guestxp.models.restaurant
 
 import com.mediapadtech.guestxp.models.common.{Comment, Media}
-import com.mediapadtech.guestxp.models.restaurant.Menu.{Name, Category}
 
 /**
  * This file is part of guest-xp.
@@ -29,11 +28,3 @@ case class MenuItem(name: String,
                     medias: Set[Media] = Set.empty[Media],
                     comments: List[Comment] = List.empty[Comment],
                     rating: Option[Double])
-
-object Menu {
-
-  type Category = String
-
-  type Name = String
-
-}
