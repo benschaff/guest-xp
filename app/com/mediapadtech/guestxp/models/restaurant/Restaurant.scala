@@ -20,7 +20,8 @@ import com.mediapadtech.guestxp.models.common.{Contact, Coordinates, Address}
  *
  * "Copyright 2014 Benjamin Schaff"
  */
-case class Restaurant(name: String,
+case class Restaurant(clientId: String,
+                      name: String,
                       address: Address,
                       coordinates: Option[Coordinates] = None,
                       contact: Option[Contact] = None,
