@@ -8,6 +8,7 @@ import play.api.libs.json._
 import com.mediapadtech.guestxp.models.restaurant.Restaurant
 import com.mediapadtech.guestxp.models.restaurant.JsFormat.restaurantFormat
 import scala.concurrent.Future
+import play.Logger
 
 /**
  * This file is part of Guest eXPerience.
@@ -36,6 +37,23 @@ trait RestaurantAPI {
     restaurants.find(Json.obj("owner" -> owner)).cursor[Restaurant].collect[List]() map {
       restaurants => Ok(Json.toJson(restaurants))
     }
+  }
+
+  def create(owner: String) = Action.async(parse.json) {
+    request =>
+      request.body.validate[Restaurant].map {
+        case restaurant: Restaurant =>
+          restaurants.insert(restaurant).map {
+            lastError =>
+              if (!lastError.ok) {
+                Logger.error(s"Failed to create restaurant($restaurant). Error message => $lastError")
+
+                failure(Error.RESTAURANT_CREATION_FAILED.getCode, Error.RESTAURANT_CREATION_FAILED.getMessageKey, InternalServerError.apply)
+              } else success[Restaurant](restaurant, Created.apply)
+          }
+      }.recoverTotal {
+        e => Future.successful(failure(Error.RESTAURANT_INVALID.getCode, Error.RESTAURANT_INVALID.getMessageKey, BadRequest.apply, JsError.toFlatJson(e)))
+      }
   }
 
 }

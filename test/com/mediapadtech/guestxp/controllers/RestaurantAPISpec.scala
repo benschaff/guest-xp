@@ -1,20 +1,20 @@
 package com.mediapadtech.guestxp.controllers
 
-import com.mediapadtech.guestxp.models.restaurant.Restaurant
+import com.mediapadtech.guestxp.models.common.Address
 import com.mediapadtech.guestxp.models.restaurant.JsFormat.restaurantFormat
+import com.mediapadtech.guestxp.models.restaurant.Restaurant
 import org.specs2.mock.Mockito
 import org.specs2.mutable._
 import play.api.libs.json._
+import play.api.mvc.{Request, Controller}
 import play.api.test.Helpers._
 import play.api.test._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import reactivemongo.api.collections.GenericQueryBuilder
-import play.api.libs.json.JsArray
 import play.modules.reactivemongo.json.collection.JSONCollection
-import play.api.libs.json.JsObject
 import reactivemongo.api.Cursor
-import play.api.mvc.Controller
+import reactivemongo.api.collections.GenericQueryBuilder
+import reactivemongo.core.commands.LastError
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * This file is part of Guest eXPerience.
@@ -34,14 +34,26 @@ import play.api.mvc.Controller
  *
  * "Copyright 2014 Benjamin Schaff"
  */
-object RestaurantAPISpec extends Specification with Mockito {
+object RestaurantAPISpec extends SpecificationWithJUnit with Mockito {
 
   private val Owner: String = "owner"
+
+  private val Restaurant1: Restaurant = Restaurant(
+    ownerId = Owner,
+    name = "Restaurant1",
+    address = Address(1, "street", "postalCode", "city", "state", "country")
+  )
+
+  private val Restaurant2: Restaurant = Restaurant(
+    ownerId = Owner,
+    name = "Restaurant2",
+    address = Address(1, "street", "postalCode", "city", "state", "country")
+  )
 
   "Restaurant api" should {
 
     "return an empty list" in {
-      val restaurantAPI = initializeRestaurantAPI(List.empty[Restaurant])
+      val restaurantAPI = initializeRestaurantAPIList(List.empty[Restaurant])
 
       val result = restaurantAPI.list(Owner)(FakeRequest())
 
@@ -52,9 +64,57 @@ object RestaurantAPISpec extends Specification with Mockito {
       contentAsJson(result).as[JsArray].value must beEmpty
     }
 
+    s"return List($Restaurant1)" in {
+      val restaurantAPI = initializeRestaurantAPIList(List(Restaurant1))
+
+      val result = restaurantAPI.list(Owner)(FakeRequest())
+
+      status(result) must equalTo(OK)
+      contentType(result) must beSome("application/json")
+      charset(result) must beSome("utf-8")
+
+      val restaurants = contentAsJson(result).as[List[Restaurant]]
+      restaurants must not be empty
+      restaurants.size must equalTo(1)
+      restaurants.head must equalTo(Restaurant1)
+    }
+
+    s"return List($Restaurant1, $Restaurant2)" in {
+      val restaurantAPI = initializeRestaurantAPIList(List(Restaurant1, Restaurant2))
+
+      val result = restaurantAPI.list(Owner)(FakeRequest())
+
+      status(result) must equalTo(OK)
+      contentType(result) must beSome("application/json")
+      charset(result) must beSome("utf-8")
+
+      val restaurants = contentAsJson(result).as[List[Restaurant]]
+      restaurants must not be empty
+      restaurants.size must equalTo(2)
+      restaurants.head must equalTo(Restaurant1)
+      restaurants.tail.head must equalTo(Restaurant2)
+    }
+
+    "fail to create restaurant with validation error" in {
+      val restaurantAPI = initializeRestaurantAPICreateFail()
+
+      val request: Request[JsObject] = FakeRequest().withBody(Json.obj("owner" -> Owner))
+      val result = restaurantAPI.create(Owner)(request)
+
+      status(result) must equalTo(BAD_REQUEST)
+      contentType(result) must beSome("application/json")
+      charset(result) must beSome("utf-8")
+
+      val message = contentAsJson(result)
+      (message \ "status").as[String] must equalTo("failure")
+      (message \ "code").as[Int] must equalTo(Error.RESTAURANT_INVALID.getCode)
+      (message \ "message").as[String] must equalTo(Error.RESTAURANT_INVALID.getMessageKey)
+      (message \ "reason").asOpt[JsObject].isDefined must beTrue
+    }
+
   }
 
-  private def initializeRestaurantAPI(response: List[Restaurant]): RestaurantAPI = {
+  private def initializeRestaurantAPIList(response: List[Restaurant]): RestaurantAPI = {
     trait RestaurantAPIStub extends Controller with RestaurantAPI
 
     val queryBuilder = mock[GenericQueryBuilder[JsObject, Reads, Writes]]
@@ -68,6 +128,27 @@ object RestaurantAPISpec extends Specification with Mockito {
 
     cursor.collect[List]() returns Future {
       response
+    }
+
+    new RestaurantAPIStub {
+      override def restaurants: JSONCollection = collection
+    }
+  }
+
+  private def initializeRestaurantAPICreateFail(): RestaurantAPI = {
+    trait RestaurantAPIStub extends Controller with RestaurantAPI
+
+    val collection = mock[JSONCollection]
+    collection.insert(any[JsObject])(any[ExecutionContext]) returns Future {
+      LastError(
+        ok = false,
+        err = Some("error"),
+        code = Some(0),
+        errMsg = Some("error message"),
+        originalDocument = None,
+        updated = 0,
+        updatedExisting = false
+      )
     }
 
     new RestaurantAPIStub {
