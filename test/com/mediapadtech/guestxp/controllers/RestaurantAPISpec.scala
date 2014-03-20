@@ -12,9 +12,11 @@ import play.api.test._
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api.Cursor
 import reactivemongo.api.collections.GenericQueryBuilder
-import reactivemongo.core.commands.LastError
+import reactivemongo.core.commands.{GetLastError, LastError}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import PersistenceError._
+import ValidationError._
 
 /**
  * This file is part of Guest eXPerience.
@@ -107,16 +109,48 @@ object RestaurantAPISpec extends SpecificationWithJUnit with Mockito {
 
       val message = contentAsJson(result)
       (message \ "status").as[String] must equalTo("failure")
-      (message \ "code").as[Int] must equalTo(Error.RESTAURANT_INVALID.getCode)
-      (message \ "message").as[String] must equalTo(Error.RESTAURANT_INVALID.getMessageKey)
+      (message \ "code").as[Int] must equalTo(RESTAURANT_INVALID.code)
+      (message \ "message").as[String] must equalTo(RESTAURANT_INVALID.messageKey)
       (message \ "reason").asOpt[JsObject].isDefined must beTrue
+    }
+
+    "fail to create restaurant with persistence error" in {
+      val restaurantAPI = initializeRestaurantAPICreateFail()
+
+      val request: Request[JsValue] = FakeRequest().withBody(Json.toJson(Restaurant1))
+      val result = restaurantAPI.create(Owner)(request)
+
+      status(result) must equalTo(INTERNAL_SERVER_ERROR)
+      contentType(result) must beSome("application/json")
+      charset(result) must beSome("utf-8")
+
+      val message = contentAsJson(result)
+      (message \ "status").as[String] must equalTo("failure")
+      (message \ "code").as[Int] must equalTo(RESTAURANT_CREATION_FAILED.code)
+      (message \ "message").as[String] must equalTo(RESTAURANT_CREATION_FAILED.messageKey)
+      (message \ "reason").asOpt[JsObject].isDefined must beFalse
+    }
+
+    "success to create restaurant" in {
+      val restaurantAPI = initializeRestaurantAPICreateSuccess()
+
+      val request: Request[JsValue] = FakeRequest().withBody(Json.toJson(Restaurant1))
+      val result = restaurantAPI.create(Owner)(request)
+
+      status(result) must equalTo(CREATED)
+      contentType(result) must beSome("application/json")
+      charset(result) must beSome("utf-8")
+
+      val message = contentAsJson(result)
+      (message \ "status").as[String] must equalTo("success")
+      (message \ "content").as[Restaurant] must equalTo(Restaurant1)
     }
 
   }
 
-  private def initializeRestaurantAPIList(response: List[Restaurant]): RestaurantAPI = {
-    trait RestaurantAPIStub extends Controller with RestaurantAPI
+  trait RestaurantAPIStub extends Controller with RestaurantAPI
 
+  private def initializeRestaurantAPIList(response: List[Restaurant]): RestaurantAPI = {
     val queryBuilder = mock[GenericQueryBuilder[JsObject, Reads, Writes]]
 
     val collection = mock[JSONCollection]
@@ -136,15 +170,32 @@ object RestaurantAPISpec extends SpecificationWithJUnit with Mockito {
   }
 
   private def initializeRestaurantAPICreateFail(): RestaurantAPI = {
-    trait RestaurantAPIStub extends Controller with RestaurantAPI
-
     val collection = mock[JSONCollection]
-    collection.insert(any[JsObject])(any[ExecutionContext]) returns Future {
+    collection.insert[Restaurant](any[Restaurant], any[GetLastError])(any[Writes[Restaurant]], any[ExecutionContext]) returns Future {
       LastError(
         ok = false,
         err = Some("error"),
         code = Some(0),
         errMsg = Some("error message"),
+        originalDocument = None,
+        updated = 0,
+        updatedExisting = false
+      )
+    }
+
+    new RestaurantAPIStub {
+      override def restaurants: JSONCollection = collection
+    }
+  }
+
+  private def initializeRestaurantAPICreateSuccess(): RestaurantAPI = {
+    val collection = mock[JSONCollection]
+    collection.insert[Restaurant](any[Restaurant], any[GetLastError])(any[Writes[Restaurant]], any[ExecutionContext]) returns Future {
+      LastError(
+        ok = true,
+        err = None,
+        code = None,
+        errMsg = None,
         originalDocument = None,
         updated = 0,
         updatedExisting = false

@@ -9,6 +9,8 @@ import com.mediapadtech.guestxp.models.restaurant.Restaurant
 import com.mediapadtech.guestxp.models.restaurant.JsFormat.restaurantFormat
 import scala.concurrent.Future
 import play.Logger
+import PersistenceError._
+import ValidationError._
 
 /**
  * This file is part of Guest eXPerience.
@@ -48,11 +50,11 @@ trait RestaurantAPI {
               if (!lastError.ok) {
                 Logger.error(s"Failed to create restaurant($restaurant). Error message => $lastError")
 
-                failure(Error.RESTAURANT_CREATION_FAILED.getCode, Error.RESTAURANT_CREATION_FAILED.getMessageKey, InternalServerError.apply)
+                failure(RESTAURANT_CREATION_FAILED.code, RESTAURANT_CREATION_FAILED.messageKey, InternalServerError.apply)
               } else success[Restaurant](restaurant, Created.apply)
           }
       }.recoverTotal {
-        e => Future.successful(failure(Error.RESTAURANT_INVALID.getCode, Error.RESTAURANT_INVALID.getMessageKey, BadRequest.apply, JsError.toFlatJson(e)))
+        e => Future.successful(failure(RESTAURANT_INVALID.code, RESTAURANT_INVALID.messageKey, BadRequest.apply, JsError.toFlatJson(e)))
       }
   }
 
