@@ -41,6 +41,13 @@ trait RestaurantAPI {
     }
   }
 
+  def get(owner: String, uuid: String) = Action.async {
+    restaurants.find(Json.obj("owner" -> owner, "uuid" -> uuid)).one[Restaurant] map {
+      case Some(restaurant) => Ok(Json.toJson(restaurant))
+      case None => NoContent
+    }
+  }
+
   def create(owner: String) = Action.async(parse.json) {
     request =>
       request.body.validate[Restaurant].map {
@@ -56,6 +63,36 @@ trait RestaurantAPI {
       }.recoverTotal {
         e => Future.successful(failure(RESTAURANT_INVALID.code, RESTAURANT_INVALID.messageKey, BadRequest.apply, JsError.toFlatJson(e)))
       }
+  }
+
+  def update(owner: String, uuid: String) = Action.async(parse.json) {
+    request =>
+      request.body.validate[Restaurant].map {
+        case restaurant: Restaurant =>
+          val modifier = restaurant.copy(ownerId = owner, uuid = uuid)
+
+          restaurants.update(Json.obj("owner" -> owner, "uuid" -> uuid), modifier).map {
+            lastError =>
+              if (!lastError.ok) {
+                Logger.error(s"Failed to update restaurant($restaurant). Error message => $lastError")
+
+                failure(RESTAURANT_UPDATE_FAILED.code, RESTAURANT_UPDATE_FAILED.messageKey, InternalServerError.apply)
+              } else success[Restaurant](modifier, Accepted.apply)
+          }
+      }.recoverTotal {
+        e => Future.successful(failure(RESTAURANT_INVALID.code, RESTAURANT_INVALID.messageKey, BadRequest.apply, JsError.toFlatJson(e)))
+      }
+  }
+
+  def delete(owner: String, uuid: String) = Action.async {
+    restaurants.remove(Json.obj("owner" -> owner, "uuid" -> uuid)).map {
+      lastError =>
+        if (!lastError.ok) {
+          Logger.error(s"Failed to remove restaurant with uuid = $uuid. Error message => $lastError")
+
+          failure(RESTAURANT_DELETE_FAILED.code, RESTAURANT_DELETE_FAILED.messageKey, InternalServerError.apply)
+        } else success[JsObject](Json.obj("uuid" -> uuid), Accepted.apply)
+    }
   }
 
 }

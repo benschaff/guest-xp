@@ -1,6 +1,7 @@
 package com.mediapadtech.guestxp.models.restaurant
 
 import com.mediapadtech.guestxp.models.common.{Contact, Coordinates, Address}
+import java.util.UUID
 
 /**
  * This file is part of Guest eXPerience.
@@ -21,6 +22,7 @@ import com.mediapadtech.guestxp.models.common.{Contact, Coordinates, Address}
  * "Copyright 2014 Benjamin Schaff"
  */
 case class Restaurant(ownerId: String,
+                      uuid: String = UUID.randomUUID().toString,
                       name: String,
                       address: Address,
                       coordinates: Option[Coordinates] = None,

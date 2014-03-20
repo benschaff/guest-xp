@@ -24,4 +24,8 @@ object PersistenceError {
 
   val RESTAURANT_CREATION_FAILED = PersistenceError(2000, "persistence.error.message.restaurant.creation.failed")
 
+  val RESTAURANT_UPDATE_FAILED = PersistenceError(2001, "persistence.error.message.restaurant.update.failed")
+
+  val RESTAURANT_DELETE_FAILED = PersistenceError(2002, "persistence.error.message.restaurant.delete.failed")
+
 }
