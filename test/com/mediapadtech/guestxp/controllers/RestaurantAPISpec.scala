@@ -212,6 +212,36 @@ object RestaurantAPISpec extends SpecificationWithJUnit with Mockito {
       (message \ "content").as[Restaurant] must equalTo(Restaurant1.copy(uuid = "0"))
     }
 
+    "fail to delete restaurant with persistence error" in {
+      val restaurantAPI = initializeRestaurantAPIRemoveFail()
+
+      val result = restaurantAPI.delete(Owner, "0")(FakeRequest())
+
+      status(result) must equalTo(INTERNAL_SERVER_ERROR)
+      contentType(result) must beSome("application/json")
+      charset(result) must beSome("utf-8")
+
+      val message = contentAsJson(result)
+      (message \ "status").as[String] must equalTo("failure")
+      (message \ "code").as[Int] must equalTo(RESTAURANT_DELETE_FAILED.code)
+      (message \ "message").as[String] must equalTo(RESTAURANT_DELETE_FAILED.messageKey)
+      (message \ "reason").asOpt[JsObject].isDefined must beFalse
+    }
+
+    "success to delete restaurant" in {
+      val restaurantAPI = initializeRestaurantAPIRemoveSuccess()
+
+      val result = restaurantAPI.delete(Owner, "0")(FakeRequest())
+
+      status(result) must equalTo(ACCEPTED)
+      contentType(result) must beSome("application/json")
+      charset(result) must beSome("utf-8")
+
+      val message = contentAsJson(result)
+      (message \ "status").as[String] must equalTo("success")
+      (message \ "content" \ "uuid").as[String] must equalTo("0")
+    }
+
   }
 
   trait RestaurantAPIStub extends Controller with RestaurantAPI
@@ -314,6 +344,44 @@ object RestaurantAPISpec extends SpecificationWithJUnit with Mockito {
         ok = true,
         err = None,
         code = None,
+        errMsg = None,
+        originalDocument = None,
+        updated = 0,
+        updatedExisting = false
+      )
+    }
+
+    new RestaurantAPIStub {
+      override def restaurants: JSONCollection = collection
+    }
+  }
+
+  private def initializeRestaurantAPIRemoveFail(): RestaurantAPI = {
+    val collection = mock[JSONCollection]
+    collection.remove[JsObject](any[JsObject], any[GetLastError], any[Boolean])(any[Writes[JsObject]], any[ExecutionContext]) returns Future {
+      LastError(
+        ok = false,
+        err = Some("error"),
+        code = Some(0),
+        errMsg = Some("error message"),
+        originalDocument = None,
+        updated = 0,
+        updatedExisting = false
+      )
+    }
+
+    new RestaurantAPIStub {
+      override def restaurants: JSONCollection = collection
+    }
+  }
+
+  private def initializeRestaurantAPIRemoveSuccess(): RestaurantAPI = {
+    val collection = mock[JSONCollection]
+    collection.remove[JsObject](any[JsObject], any[GetLastError], any[Boolean])(any[Writes[JsObject]], any[ExecutionContext]) returns Future {
+      LastError(
+        ok = true,
+        err = None,
+        code = Some(0),
         errMsg = None,
         originalDocument = None,
         updated = 0,
