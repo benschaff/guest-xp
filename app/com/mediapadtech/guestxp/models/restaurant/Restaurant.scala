@@ -21,7 +21,7 @@ import java.util.UUID
  *
  * "Copyright 2014 Benjamin Schaff"
  */
-case class Restaurant(ownerId: String,
+case class Restaurant(ownerId: String = "6646e1df-7975-454b-8d2a-434a19f0fa61",
                       uuid: String = UUID.randomUUID().toString,
                       name: String,
                       address: Address,
@@ -30,4 +30,4 @@ case class Restaurant(ownerId: String,
                       schedule: Map[Day, ScheduleEntry] = Map.empty[Day, ScheduleEntry],
                       menus: Map[Name, Menu] = Map.empty[Name, Menu])
 
-case class ScheduleEntry(openingHour: Int, closingHour: Int)
+case class ScheduleEntry(opened: Boolean, openingHour: Int, closingHour: Int)

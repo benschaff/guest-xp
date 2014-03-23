@@ -1,1 +1,162 @@
 <h1 class="page-header">Restaurant Information</h1>
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label for="name" class="col-sm-2 control-label">Name</label>
+
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="name" placeholder="Name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Address</label>
+
+        <div class="col-sm-10">
+            <div class="form-group">
+                <div class="col-sm-1">
+                    <input type="number" class="form-control" id="number" placeholder="Number">
+                </div>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="street" placeholder="Street">
+                </div>
+                <div class="col-sm-1">
+                    <input type="text" class="form-control" id="postal-code" placeholder="Postal code">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="city" placeholder="City">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="state" placeholder="State">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="country" placeholder="Country">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Coordinates</label>
+
+        <div class="col-sm-10">
+            <div class="form-group">
+                <div class="col-sm-1">
+                    <input type="number" class="form-control" id="latitude" placeholder="Latitude">
+                </div>
+                <div class="col-sm-1">
+                    <input type="number" class="form-control" id="longitude" placeholder="Longitude">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Contact</label>
+
+        <div class="col-sm-10">
+            <div class="form-group">
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="contact-name" placeholder="Name">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="contact-last-name" placeholder="Last name">
+                </div>
+                <div class="col-sm-4">
+                    <input type="email" class="form-control" id="contact-mail" placeholder="Email">
+                </div>
+                <div class="col-sm-2">
+                    <input type="tel" class="form-control" id="contact-phone-number" placeholder="Phone number">
+                </div>
+                <div class="col-sm-2">
+                    <input type="tel" class="form-control" id="contact-fax-number" placeholder="Fax number">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Schedule</label>
+
+        <div class="col-sm-6">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Opened</th>
+                    <th>Opening hour</th>
+                    <th>Closing hour</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td data-day-number="1">Monday</td>
+                    <td><input type="checkbox"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td data-day-number="2">Tuesday</td>
+                    <td><input type="checkbox"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td data-day-number="3">Wednesday</td>
+                    <td><input type="checkbox"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td data-day-number="4">Thursday</td>
+                    <td><input type="checkbox"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td data-day-number="5">Friday</td>
+                    <td><input type="checkbox"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td data-day-number="6">Saturday</td>
+                    <td><input type="checkbox"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td data-day-number="7">Sunday</td>
+                    <td><input type="checkbox"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Menus</label>
+
+        <div class="col-sm-6">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Active</th>
+                    <th>Details</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-2">
+            <button type="button" class="btn btn-primary">New menu</button>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-2">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="reset" class="btn btn-danger">Cancel</button>
+        </div>
+    </div>
+</form>
